@@ -6,7 +6,7 @@ spring:
           kakao:
             client-id: ${KAKAO_REST_API_KEY}
             client-name: Kakao
-            redirect-uri: "https://api.u-hyu.site/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://uhyu-api.pillow12360.world/login/oauth2/code/{registrationId}"
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             scope:
@@ -43,7 +43,7 @@ jwt:
   access-token-expiration-time: ${ACCESS_TOKEN_EXP}
   refresh-token-expiration-days: ${REFRESH_TOKEN_EXP}
   cookie:
-    domain: u-hyu.site
+    domain: pillow12360.world
     secure: true
     same-site: Lax
 
@@ -61,3 +61,8 @@ server:
 
 fastapi:
   url: ${FASTAPI_RECOMMEND_HOST}
+
+app:
+  frontend:
+    url:
+      prod: https://uhyu.pillow12360.world
