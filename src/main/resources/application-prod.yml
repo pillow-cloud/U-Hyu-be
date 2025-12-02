@@ -70,10 +70,10 @@ app:
 cloud:
   aws:
     credentials:
-      access-key: ${MINIO_ACCESS_KEY:pillow12360}
-      secret-key: ${MINIO_SECRET_KEY:ehdcks201352}
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
     region:
       static: us-east-1
     s3:
       bucket: uhyu-bucket
-      endpoint: ${MINIO_ENDPOINT:http://homecloud-minio:9000}
+      endpoint: ${MINIO_ENDPOINT}
