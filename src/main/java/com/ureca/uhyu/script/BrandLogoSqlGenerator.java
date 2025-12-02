@@ -47,6 +47,10 @@ public class BrandLogoSqlGenerator implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        log.info("BrandLogoSqlGenerator 시작...");
+        log.info("Endpoint: {}", endpoint);
+        log.info("Bucket: {}", bucketName);
+
         // S3Client 생성 (Minio 지원)
         S3Client s3Client = S3Client.builder()
                 .region(Region.of(region))
@@ -58,10 +62,12 @@ public class BrandLogoSqlGenerator implements CommandLineRunner {
         List<S3Object> objects;
 
         try {
+            log.info("S3 객체 목록 조회 시도...");
             objects = s3Client.listObjectsV2(ListObjectsV2Request.builder()
                     .bucket(bucketName)
                     .prefix(FOLDER_PREFIX)
                     .build()).contents();
+            log.info("S3 객체 목록 조회 성공. 개수: {}", objects.size());
         } catch (Exception e) {
             log.error("S3 객체 목록 조회 중 오류 발생", e);
             return;
