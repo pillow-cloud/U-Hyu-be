@@ -66,3 +66,14 @@ app:
   frontend:
     url:
       prod: https://uhyu.pillow12360.world
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${MINIO_ACCESS_KEY:pillow12360}
+      secret-key: ${MINIO_SECRET_KEY:ehdcks201352}
+    region:
+      static: us-east-1
+    s3:
+      bucket: uhyu-bucket
+      endpoint: ${MINIO_ENDPOINT:http://homecloud-minio:9000}
