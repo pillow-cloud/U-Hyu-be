@@ -100,14 +100,10 @@ public class BrandLogoSqlGenerator implements CommandLineRunner {
                         .replace("+", "%20")
                         .replace("%2F", "/");
 
-                // Minio URL 생성 (endpoint + bucket + key)
-                // endpoint가 http://localhost:9000 이라면 -> http://localhost:9000/bucket/key
-                String imageUrl;
-                if (endpoint.contains("amazonaws.com")) {
-                     imageUrl = String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, encodedKey);
-                } else {
-                     imageUrl = String.format("%s/%s/%s", endpoint, bucketName, encodedKey);
-                }
+                // Minio URL 생성 (외부 접속용 Public URL 사용)
+                // endpoint는 백엔드 접속용(내부), imageUrl은 프론트엔드 접속용(외부)
+                String publicUrl = "https://minio.pillow12360.world";
+                String imageUrl = String.format("%s/%s/%s", publicUrl, bucketName, encodedKey);
 
                 String sql = String.format("UPDATE brands SET logo_image = '%s' WHERE brand_name = '%s';", imageUrl, brandName);
                 writer.write(sql);
