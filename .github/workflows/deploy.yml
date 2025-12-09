@@ -3,12 +3,12 @@ name: Deploy U-Hyu Backend
 on:
   push:
     branches:
-      - main      # main에 push될 때 배포
+      - develop      # main에 push될 때 배포
   workflow_dispatch:  # 버튼 눌러서 수동 실행도 가능
 
 jobs:
   deploy:
-    uses: pillow12360/infra-ci/.github/workflows/spring-docker-ci.yml@main
+    uses: pillow12360/infra-ci/.github/workflows/spring-boot-ci.yml@main
     with:
       service_name: "u-hyu-be"
       registry_url: "registry.pillow12360.world"
