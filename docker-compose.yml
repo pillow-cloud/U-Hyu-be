@@ -15,7 +15,10 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - uhyu-net
+      - monitoring
 
 networks:
   uhyu-net:
+    external: true
+  monitoring:
     external: true
