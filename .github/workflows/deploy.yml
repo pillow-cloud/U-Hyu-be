@@ -11,7 +11,7 @@ jobs:
     uses: pillow-cloud/infra-ci/.github/workflows/spring-boot-ci.yml@main
     with:
       service_name: "u-hyu-be"
-      registry_url: "registry.pillow12360.world"
+      registry_url: "localhost:5000"
       dockerfile: "./Dockerfile"               # 필요시 변경
       image_tag: "latest"                      # 나중에 git SHA로 바꿔도 됨
       compose_file: "./docker-compose.yml"     # 실제 사용하는 compose 경로
