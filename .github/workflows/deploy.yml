@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    uses: pillow12360/infra-ci/.github/workflows/spring-boot-ci.yml@main
+    uses: pillow-cloud/infra-ci/.github/workflows/spring-boot-ci.yml@main
     with:
       service_name: "u-hyu-be"
       registry_url: "registry.pillow12360.world"
