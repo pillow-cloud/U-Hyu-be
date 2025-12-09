@@ -2,12 +2,12 @@ version: '3'
 
 services:
   uhyu-backend:
-    image: localhost:5000/u-hyu-be:latest   # CI에서 쓰는 registry_url이랑 동일하게
+    image: localhost:5000/u-hyu-be:latest
     container_name: uhyu-backend
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - /home/pillow/srv/U-Hyu-be/.env
     environment:
       FASTAPI_RECOMMEND_HOST: http://uhyu-recommender:8000
     restart: always
