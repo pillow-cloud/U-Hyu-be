@@ -3,7 +3,7 @@ version: '3'
 services:
   uhyu-backend:
     build: .
-    image: u-hyu-be  # GitHub Actions에서 빌드 후 사용할 이미지명
+    image: registry.pillow12360.world/u-hyu-be:latest
     container_name: uhyu-backend
     ports:
       - "8080:8080"
