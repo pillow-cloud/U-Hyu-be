@@ -9,7 +9,8 @@ services:
     env_file:
       - /home/pillow/srv/U-Hyu-be/.env
     environment:
-      FASTAPI_RECOMMEND_HOST: http://uhyu-recommender:8000
+      - SPRING_PROFILES_ACTIVE=prod
+      - FASTAPI_RECOMMEND_HOST=http://uhyu-recommender:8000
     restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
