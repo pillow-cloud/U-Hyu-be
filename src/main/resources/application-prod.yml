@@ -77,3 +77,15 @@ cloud:
     s3:
       bucket: uhyu-bucket
       endpoint: ${MINIO_ENDPOINT}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: uhyu-backend

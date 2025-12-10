@@ -1,36 +1,20 @@
-name: Deploy to EC2 on merge to main
+name: Deploy U-Hyu Backend
 
 on:
   push:
     branches:
-      - main
+      - develop      # main에 push될 때 배포
+  workflow_dispatch:  # 버튼 눌러서 수동 실행도 가능
 
 jobs:
   deploy:
-    if: github.event.head_commit.message != 'Merge pull request'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: ✅ Checkout source
-        uses: actions/checkout@v3
-
-      - name: 🔑 Add SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-        shell: bash
-
-      - name: 🛡️ Add known hosts
-        run: |
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-      - name: 🚀 Deploy to EC2 via SSH
-        run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/U-Hyu-be
-            git pull origin main
-            ./gradlew clean build -x test
-            sudo docker-compose down
-            sudo docker-compose up -d --build
-          EOF
+    uses: pillow-cloud/infra-ci/.github/workflows/spring-boot-ci.yml@main
+    with:
+      service_name: "u-hyu-be"
+      registry_url: "localhost:5000"
+      dockerfile: "./Dockerfile"               # 필요시 변경
+      image_tag: "latest"                      # 나중에 git SHA로 바꿔도 됨
+      compose_file: "./docker-compose.yml"     # 실제 사용하는 compose 경로
+    secrets:
+      DOCKER_REGISTRY_USERNAME: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+      DOCKER_REGISTRY_PASSWORD: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
