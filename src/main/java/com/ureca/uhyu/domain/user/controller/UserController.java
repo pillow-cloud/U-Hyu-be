@@ -11,17 +11,20 @@ import com.ureca.uhyu.domain.user.entity.User;
 import com.ureca.uhyu.domain.user.enums.UserRole;
 import com.ureca.uhyu.domain.user.service.UserService;
 import com.ureca.uhyu.global.annotation.CurrentUser;
+import com.ureca.uhyu.global.exception.GlobalException;
 import com.ureca.uhyu.global.response.CommonResponse;
 import com.ureca.uhyu.global.response.ResultCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @Tag(name = "사용자", description = "사용자 정보 관리 및 온보딩 관련 API")
+@Slf4j
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -36,6 +39,11 @@ public class UserController implements UserControllerDocs {
             HttpServletResponse response,
             @CurrentUser User user
     ) {
+        if (user == null) {
+            log.error("❌ onboarding 요청에서 user 정보가 없습니다. (토큰 누락 또는 만료)");
+            throw new GlobalException(ResultCode.UNAUTHORIZED);
+        }
+
         Long userId = userService.saveOnboardingInfo(request, user);
 
         tokenService.addAccessTokenCookie(response, String.valueOf(userId), UserRole.USER);

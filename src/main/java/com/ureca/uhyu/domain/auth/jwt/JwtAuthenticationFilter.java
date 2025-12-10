@@ -124,9 +124,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (IllegalArgumentException e) {
             log.error("❌ 잘못된 JWT 토큰 포맷: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } catch (Exception e) {
-            log.error("❌ JwtAuthenticationFilter 예외 발생", e);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } catch (GlobalException e) {
+            log.error("❌ JWT 처리 중 GlobalException 발생: {}", e.getMessage());
+            response.sendRedirect("/login");
         }
     }
 
