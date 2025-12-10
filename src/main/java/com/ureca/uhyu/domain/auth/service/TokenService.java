@@ -75,6 +75,8 @@ public class TokenService {
 
         // 상세한 디버깅 로그
         log.info("=== 쿠키 설정 상세 정보 ===");
+        log.info("ACCESS_TOKEN_EXP (raw ms): {}", jwtTokenProvider.getAccessTokenExp());
+        log.info("Calculated MaxAge (sec): {}", jwtTokenProvider.getAccessTokenExp() / 1000);
         log.info("Domain: '{}' (null={}) ", finalDomain, finalDomain == null);
         log.info("Secure: {}", isSecure);
         log.info("SameSite: '{}'", sameSite);

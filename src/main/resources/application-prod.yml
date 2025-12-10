@@ -45,7 +45,7 @@ jwt:
   cookie:
     domain: pillow12360.world
     secure: true
-    same-site: Lax
+    same-site: None
 
 logging:
   level:
