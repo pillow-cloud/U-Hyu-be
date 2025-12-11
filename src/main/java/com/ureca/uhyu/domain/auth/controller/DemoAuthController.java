@@ -41,7 +41,7 @@ public class DemoAuthController {
                                 .nickname("체험용 유저")
                                 .role(UserRole.USER) // 일반 유저 권한
                                 .status(Status.ACTIVE)
-                                .grade(Grade.CHALLENGER)
+                                .grade(Grade.GOOD)
                                 .build()
                 ));
 
