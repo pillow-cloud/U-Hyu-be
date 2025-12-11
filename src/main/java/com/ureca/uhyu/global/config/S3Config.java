@@ -24,7 +24,7 @@ public class S3Config {
     @Value("${cloud.aws.s3.endpoint}")
     private String endpoint;
 
-    @Value("${cloud.aws.s3.public-endpoint}")
+    @Value("${cloud.aws.s3.public-endpoint:}")
     private String publicEndpoint;
 
     @Bean
