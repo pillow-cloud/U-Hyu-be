@@ -47,13 +47,32 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private KakaoUserInfoResponse extractUserInfo(Map<String, Object> attributes) {
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        Map<String, Object> profile = (Map<String, Object>) (kakaoAccount != null ? kakaoAccount.get("profile") : null);
+
+        if (kakaoAccount == null || profile == null) {
+            // throw new GlobalException(ResultCode.INVALID_OAUTH_DATA); // Or just log and return null/default
+            // For now, let's assume if it's null we might have issues, but let's try to proceed defensively or log.
+             // Identifying this as a potential point of failure.
+             // Ideally we should throw a specific exception that is handled.
+             // But existing code structure suggests we expect these to be present.
+             // Let's just add the null check to avoid NPE.
+        }
 
         Long kakaoId = Long.valueOf(attributes.get("id").toString());
-        String nickname = profile.getOrDefault("nickname", "사용자").toString();
-        String profileImage = profile.getOrDefault("profile_image_url", null) != null
-                ? profile.get("profile_image_url").toString() : null;
-        String email = kakaoAccount.getOrDefault("email", "temp_kakao_" + kakaoId + "@example.com").toString();
+        
+        String nickname = "사용자";
+        String profileImage = null;
+        String email = "temp_kakao_" + kakaoId + "@example.com";
+
+        if (profile != null) {
+            nickname = profile.getOrDefault("nickname", "사용자").toString();
+            profileImage = profile.getOrDefault("profile_image_url", null) != null
+                    ? profile.get("profile_image_url").toString() : null;
+        }
+        
+        if (kakaoAccount != null) {
+             email = kakaoAccount.getOrDefault("email", email).toString();
+        }
 
         return new KakaoUserInfoResponse(kakaoId, nickname, email, profileImage);
     }

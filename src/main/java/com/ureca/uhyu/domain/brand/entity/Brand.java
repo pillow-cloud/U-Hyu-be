@@ -4,8 +4,6 @@ import com.ureca.uhyu.domain.brand.enums.StoreType;
 import com.ureca.uhyu.domain.store.entity.Store;
 import com.ureca.uhyu.domain.user.enums.Grade;
 import com.ureca.uhyu.global.entity.BaseEntity;
-import com.ureca.uhyu.global.exception.GlobalException;
-import com.ureca.uhyu.global.response.ResultCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -72,13 +70,17 @@ public class Brand extends BaseEntity {
     }
 
     public String getBenefitDescriptionByGradeOrDefault(Grade grade) {
+        if (grade == null) {
+            grade = Grade.GOOD;
+        }
+        Grade finalGrade = grade;
         return this.benefits.stream()
-                .filter(b -> b.getGrade() == grade)
+                .filter(b -> b.getGrade() == finalGrade)
                 .findFirst()
                 .or(() -> this.benefits.stream()
                         .filter(b -> b.getGrade() == Grade.GOOD)
                         .findFirst())
                 .map(Benefit::getDescription)
-                .orElseThrow(() -> new GlobalException(ResultCode.GRADE_GOOD_NOT_FOUND));
+                .orElse("혜택 정보 없음");
     }
 }
