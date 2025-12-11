@@ -21,26 +21,36 @@ public class S3Config {
     @Value("${cloud.aws.region.static}")
     private String region;
 
+    @Value("${cloud.aws.s3.endpoint}")
+    private String endpoint;
+
     @Bean
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-        return S3Client.builder()
+        var builder = S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .build();
+                .credentialsProvider(StaticCredentialsProvider.create(credentials));
+
+        if (endpoint != null && !endpoint.isBlank()) {
+            builder.endpointOverride(java.net.URI.create(endpoint))
+                   .forcePathStyle(true);
+        }
+
+        return builder.build();
     }
 
     @Bean
-    public S3Presigner s3Presigner(
-            @Value("${cloud.aws.credentials.access-key}") String accessKey,
-            @Value("${cloud.aws.credentials.secret-key}") String secretKey,
-            @Value("${cloud.aws.region.static}") String region
-    ) {
+    public S3Presigner s3Presigner() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
 
-        return S3Presigner.builder()
+        var builder = S3Presigner.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.of(region))
-                .build();
+                .region(Region.of(region));
+
+        if (endpoint != null && !endpoint.isBlank()) {
+           builder.endpointOverride(java.net.URI.create(endpoint));
+        }
+
+        return builder.build();
     }
 }
