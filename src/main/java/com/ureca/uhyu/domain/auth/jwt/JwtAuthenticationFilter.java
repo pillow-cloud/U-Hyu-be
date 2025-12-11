@@ -1,6 +1,7 @@
 package com.ureca.uhyu.domain.auth.jwt;
 
 import com.ureca.uhyu.domain.auth.dto.CustomUserDetails;
+import com.ureca.uhyu.domain.auth.service.TokenService;
 import com.ureca.uhyu.domain.auth.repository.TokenRepository;
 import com.ureca.uhyu.domain.auth.service.CustomUserDetailsService;
 import com.ureca.uhyu.domain.user.enums.UserRole;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
     private final CustomUserDetailsService customUserDetailsService;
+    private final TokenService tokenService;
 
     // spring security의 인증 필터와 맞춰 줘야 함
     @Override
@@ -53,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String accessToken = extractAccessTokenFromCookie(request);
 
             if (accessToken == null || accessToken.trim().isEmpty()) {
-                log.debug("access_token이 비어있음");
+                log.warn("⏳ Access Token이 쿠키에 없음 (URI: {})", request.getRequestURI());
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -90,31 +92,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .orElse(null);
 
             log.debug("리프레시 토큰 : " + refreshToken);
-            log.debug("jwtTokenProvider.validateToken(refreshToken) 결과 : " + jwtTokenProvider.validateToken(refreshToken));
+            
+            boolean isValidRefreshToken = refreshToken != null && jwtTokenProvider.validateToken(refreshToken);
+            log.debug("jwtTokenProvider.validateToken(refreshToken) 결과 : " + isValidRefreshToken);
 
-            if (refreshToken != null && jwtTokenProvider.validateToken(refreshToken)) {
-                log.debug("리프레시 토큰 존재 || 리프레시 토큰 validate");
+            if (isValidRefreshToken) {
+                log.info("✅ 리프레시 토큰 유효함 → Access Token 재발급 시도");
 
                 String userRoleString = jwtTokenProvider.getRoleFromToken(refreshToken);
                 if (userRoleString == null) {
+                    log.error("❌ 리프레시 토큰에서 Role 추출 실패");
                     throw new GlobalException(ResultCode.INVALID_ROLE_IN_TOKEN);
                 }
                 UserRole userRole = UserRole.valueOf(userRoleString);
 
-                String newAccessToken = jwtTokenProvider.generateToken(userId, userRole);
-
-                Cookie newAccessTokenCookie = new Cookie("access_token", newAccessToken);
-                newAccessTokenCookie.setHttpOnly(true);
-                newAccessTokenCookie.setPath("/");
-                newAccessTokenCookie.setMaxAge((int) ACCESS_TOKEN_EXP);
-                response.addCookie(newAccessTokenCookie);
+                // TokenService를 사용하여 쿠키 생성 (SameSite 등 속성 적용)
+                tokenService.addAccessTokenCookie(response, userId, userRole);
+                log.info("✅ Access Token 재발급 완료 (User: {}, Role: {})", userId, userRole);
 
                 setAuthenticationContext(request, userId, userRoleString);
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            log.debug("리프레시 토큰 존재 안함 || 리프레시 토큰 validate 안함");
+            log.warn("❌ 리프레시 토큰 존재 안함 또는 유효하지 않음 (User: {})", userId);
 
             response.sendRedirect("/login");
 

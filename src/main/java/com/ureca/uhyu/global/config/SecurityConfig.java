@@ -94,7 +94,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler())
                 )
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, tokenRepository, customUserDetailsService),
+                        new JwtAuthenticationFilter(jwtTokenProvider, tokenRepository, customUserDetailsService, tokenService),
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .exceptionHandling(exceptionHandling ->
