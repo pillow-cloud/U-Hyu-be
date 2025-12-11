@@ -13,6 +13,7 @@ cloud:
       static: ${AWS_REGION}
     s3:
       bucket: ${S3_BUCKET_NAME}
+      public-endpoint: https://minio.pillow12360.world
 
 app:
   frontend:

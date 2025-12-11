@@ -77,6 +77,7 @@ cloud:
     s3:
       bucket: uhyu-bucket
       endpoint: ${MINIO_ENDPOINT}
+      public-endpoint: https://minio.pillow12360.world
 
 management:
   endpoints:

@@ -48,7 +48,10 @@ public class S3Config {
 
         var builder = S3Presigner.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.of(region));
+                .region(Region.of(region))
+                .serviceConfiguration(software.amazon.awssdk.services.s3.S3Configuration.builder()
+                        .pathStyleAccessEnabled(true)
+                        .build());
 
         if (publicEndpoint != null && !publicEndpoint.isBlank()) {
             builder.endpointOverride(java.net.URI.create(publicEndpoint));
