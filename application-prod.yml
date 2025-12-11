@@ -64,3 +64,4 @@ cloud:
     s3:
       bucket: uhyu
       endpoint: ${MINIO_ENDPOINT:http://homecloud-minio:9000}
+      public-endpoint: https://minio.pillow12360.world

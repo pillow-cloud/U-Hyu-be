@@ -24,6 +24,9 @@ public class S3Config {
     @Value("${cloud.aws.s3.endpoint}")
     private String endpoint;
 
+    @Value("${cloud.aws.s3.public-endpoint}")
+    private String publicEndpoint;
+
     @Bean
     public S3Client s3Client() {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
@@ -47,8 +50,10 @@ public class S3Config {
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of(region));
 
-        if (endpoint != null && !endpoint.isBlank()) {
-           builder.endpointOverride(java.net.URI.create(endpoint));
+        if (publicEndpoint != null && !publicEndpoint.isBlank()) {
+            builder.endpointOverride(java.net.URI.create(publicEndpoint));
+        } else if (endpoint != null && !endpoint.isBlank()) {
+             builder.endpointOverride(java.net.URI.create(endpoint));
         }
 
         return builder.build();
