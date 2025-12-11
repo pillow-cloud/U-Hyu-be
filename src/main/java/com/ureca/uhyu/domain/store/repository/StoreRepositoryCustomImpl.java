@@ -62,13 +62,13 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
         QBenefit subBenefit = new QBenefit("subBenefit");
 
         var benefitSubQuery = JPAExpressions
-                .select(subBenefit.description)
+                .select(subBenefit.description.max()) // max() 사용으로 중복 방지 (무조건 1개 반환)
                 .from(subBenefit)
                 .where(
                         subBenefit.brand.id.eq(brand.id),
                         subBenefit.grade.eq(Grade.GOOD)
-                )
-                .limit(1);
+                );
+                // .limit(1)은 JPQL 서브쿼리에서 동작하지 않으므로 제거
 
         // ✅ DTO로 바로 Projection
         return queryFactory
