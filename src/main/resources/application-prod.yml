@@ -1,4 +1,22 @@
 spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: false
+    show-sql: false
+
   security:
     oauth2:
       client:
@@ -20,24 +38,6 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: false # 운영에서는 SQL 로그 비활성화 추천
-
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/changelog-master.yaml
-
 jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-expiration-time: ${ACCESS_TOKEN_EXP}
@@ -47,46 +47,21 @@ jwt:
     secure: true
     same-site: None
 
-logging:
-  level:
-    com.ureca.uhyu.domain.auth.jwt: info
-    com.ureca.uhyu.domain.auth.filter: info
-    com.ureca.uhyu.domain.auth.handler: info
-    org.hibernate.SQL: off
-    org.hibernate.type.descriptor.sql.BasicBinder: off
-
-server:
-  tomcat:
-    use-relative-redirects: true
+cloud:
+  aws:
+    s3:
+      endpoint: ${MINIO_ENDPOINT}
+      bucket: ${S3_BUCKET_NAME}
+      public-endpoint: https://minio.pillow12360.world
 
 fastapi:
   url: ${FASTAPI_RECOMMEND_HOST}
 
-app:
-  frontend:
-    url:
-      prod: https://uhyu.pillow12360.world
+logging:
+  level:
+    com.ureca.uhyu: info
+    org.hibernate.SQL: off
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    region:
-      static: us-east-1
-    s3:
-      bucket: uhyu-bucket
-      endpoint: ${MINIO_ENDPOINT}
-      public-endpoint: https://minio.pillow12360.world
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,prometheus
-  endpoint:
-    prometheus:
-      enabled: true
-  metrics:
-    tags:
-      application: uhyu-backend
+server:
+  tomcat:
+    use-relative-redirects: true

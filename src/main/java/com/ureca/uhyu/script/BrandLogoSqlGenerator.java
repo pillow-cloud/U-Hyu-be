@@ -68,6 +68,9 @@ public class BrandLogoSqlGenerator implements CommandLineRunner {
                     .prefix(FOLDER_PREFIX)
                     .build()).contents();
             log.info("S3 객체 목록 조회 성공. 개수: {}", objects.size());
+        } catch (software.amazon.awssdk.services.s3.model.NoSuchBucketException e) {
+            log.warn("S3 버킷({})이 존재하지 않아 로고 SQL 생성을 건너뜁니다.", bucketName);
+            return;
         } catch (Exception e) {
             log.error("S3 객체 목록 조회 중 오류 발생", e);
             return;

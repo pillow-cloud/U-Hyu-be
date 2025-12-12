@@ -2,7 +2,11 @@ spring:
   application:
     name: uhyu
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev} # 기본값 dev, 환경변수로 override 가능
+    active: ${SPRING_PROFILES_ACTIVE:local} # 기본 프로필을 local로 설정
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/changelog-master.yaml
 
 cloud:
   aws:
@@ -11,9 +15,6 @@ cloud:
       secret-key: ${AWS_SECRET_KEY}
     region:
       static: ${AWS_REGION}
-    s3:
-      bucket: ${S3_BUCKET_NAME}
-      public-endpoint: https://minio.pillow12360.world
 
 app:
   frontend:
@@ -25,7 +26,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: prometheus
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      enabled: true
   metrics:
     tags:
       application: uhyu-server
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
+  model: gpt-4o-mini

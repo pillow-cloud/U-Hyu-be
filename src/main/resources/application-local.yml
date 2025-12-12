@@ -1,4 +1,22 @@
 spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
   security:
     oauth2:
       client:
@@ -6,6 +24,7 @@ spring:
           kakao:
             client-id: ${KAKAO_REST_API_KEY}
             client-name: Kakao
+            # 로컬 개발은 무조건 localhost:8080 사용
             redirect-uri: "http://localhost:8080/login/oauth2/code/{registrationId}"
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
@@ -20,25 +39,6 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/testdb
-    username: testuser
-    password: testpass
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        format_sql: true
-    show-sql: false
-
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/changelog-master.yaml
-    clear-checksums: true
-
 jwt:
   secret: ${JWT_SECRET_KEY}
   access-token-expiration-time: ${ACCESS_TOKEN_EXP}
@@ -48,14 +48,20 @@ jwt:
     secure: false
     same-site: Lax
 
-logging:
-  level:
-    com.ureca.uhyu.domain.auth.jwt: debug
-    com.ureca.uhyu.domain.auth.filter: debug
-    com.ureca.uhyu.domain.auth.handler: debug
-    com.ureca.uhyu.domain.admin.service: debug
-    org.hibernate.SQL: off
-    org.hibernate.type.descriptor.sql.BasicBinder: debug
+cloud:
+  aws:
+    s3:
+      # 로컬 개발용 .env에서 MINIO_ENDPOINT=http://localhost:9000 설정 필요
+      endpoint: ${MINIO_ENDPOINT}
+      bucket: ${S3_BUCKET_NAME}
+      public-endpoint: ${MINIO_ENDPOINT}/${S3_BUCKET_NAME} # 퍼블릭 접근도 로컬 기준
 
 fastapi:
+   # 로컬 개발용 .env에서 FASTAPI_RECOMMEND_HOST=http://localhost:8000 설정 필요
   url: ${FASTAPI_RECOMMEND_HOST}
+
+logging:
+  level:
+    com.ureca.uhyu: debug
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
