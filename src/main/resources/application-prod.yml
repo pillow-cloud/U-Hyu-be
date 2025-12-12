@@ -49,9 +49,9 @@ jwt:
 
 logging:
   level:
-    com.ureca.uhyu.domain.auth.jwt: debug
-    com.ureca.uhyu.domain.auth.filter: debug
-    com.ureca.uhyu.domain.auth.handler: debug
+    com.ureca.uhyu.domain.auth.jwt: info
+    com.ureca.uhyu.domain.auth.filter: info
+    com.ureca.uhyu.domain.auth.handler: info
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
 

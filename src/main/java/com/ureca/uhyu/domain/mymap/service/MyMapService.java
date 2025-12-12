@@ -130,7 +130,7 @@ public class MyMapService {
                 .toList();
 
         BookmarkList bookmarkList = bookmarkListRepository.findByUser(user)
-                .orElseThrow(() -> new GlobalException(ResultCode.BOOKMARK_LIST_NOT_FOUND));
+                .orElseGet(() -> bookmarkListRepository.save(BookmarkList.builder().user(user).build()));
 
         List<Bookmark> bookmarks = bookmarkRepository.findByBookmarkList(bookmarkList);
 

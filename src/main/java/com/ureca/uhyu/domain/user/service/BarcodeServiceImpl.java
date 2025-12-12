@@ -51,9 +51,8 @@ public class BarcodeServiceImpl implements BarcodeService {
 
     @Override
     public String get(User user) {
-        Barcode barcode = barcodeRepository.findByUser(user)
-                .orElseThrow(() -> new GlobalException(ResultCode.BARCODE_NOT_FOUND));
-
-        return s3Uploader.generatePresignedUrl(barcode.getImageURL());
+        return barcodeRepository.findByUser(user)
+                .map(barcode -> s3Uploader.generatePresignedUrl(barcode.getImageURL()))
+                .orElse(null);
     }
 }

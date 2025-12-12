@@ -83,10 +83,7 @@ public class UserService {
 
         saveUserBrandData(persistedUser, request.interestedBrands(), DataType.INTEREST);
 
-        if (bookmarkListRepository.existsByUser(persistedUser)) {
-            throw new GlobalException(ResultCode.BOOKMARK_LIST_ALREADY_EXISTS);
-        }
-        else {
+        if (!bookmarkListRepository.existsByUser(persistedUser)) {
             BookmarkList bookmarkList = BookmarkList.builder()
                     .user(persistedUser)
                     .build();
@@ -200,7 +197,7 @@ public class UserService {
 
     public List<BookmarkRes> findBookmarkList(User user) {
         BookmarkList bookmarkList = bookmarkListRepository.findByUser(user)
-                .orElseThrow(() -> new GlobalException(ResultCode.BOOKMARK_LIST_NOT_FOUND));
+                .orElseGet(() -> bookmarkListRepository.save(BookmarkList.builder().user(user).build()));
         List<Bookmark> bookmarks = bookmarkRepository.findByBookmarkList(bookmarkList);
 
         return bookmarks.stream()

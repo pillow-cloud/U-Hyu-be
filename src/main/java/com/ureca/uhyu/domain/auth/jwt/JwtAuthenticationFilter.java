@@ -55,7 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String accessToken = extractAccessTokenFromCookie(request);
 
             if (accessToken == null || accessToken.trim().isEmpty()) {
-                log.warn("⏳ Access Token이 쿠키에 없음 (URI: {})", request.getRequestURI());
+                log.debug("Access Token이 쿠키에 없음 (URI: {})", request.getRequestURI());
                 filterChain.doFilter(request, response);
                 return;
             }
