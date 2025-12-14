@@ -40,6 +40,10 @@ public class AiService {
     private String systemPrompt;
 
     public AiQueryRes convertQueryToFilters(AiQueryReq req) {
+        if (req.userText() == null || req.userText().trim().isEmpty()) {
+            throw new IllegalArgumentException("검색어를 입력해주세요.");
+        }
+
         int defaultRadius = (req.defaultRadius() != null) ? req.defaultRadius() : 1000;
 
         try {
