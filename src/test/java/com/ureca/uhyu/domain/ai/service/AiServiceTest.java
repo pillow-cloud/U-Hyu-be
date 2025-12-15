@@ -7,9 +7,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@org.junit.jupiter.api.extension.ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class AiServiceTest {
 
-    private final AiService aiService = new AiService(new ObjectMapper());
+    @org.mockito.Mock
+    private com.ureca.uhyu.domain.brand.repository.BrandRepository brandRepository;
+
+    @org.mockito.Mock
+    private com.ureca.uhyu.domain.brand.repository.CategoryRepository categoryRepository;
+
+    @org.mockito.Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @org.mockito.InjectMocks
+    private AiService aiService;
 
     @Test
     @DisplayName("검색어(userText)가 null이면 IllegalArgumentException이 발생한다")

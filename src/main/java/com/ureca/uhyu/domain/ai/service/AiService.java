@@ -33,6 +33,9 @@ public class AiService {
     private String openAiModel;
 
     private final ObjectMapper objectMapper;
+    private final com.ureca.uhyu.domain.brand.repository.BrandRepository brandRepository;
+    private final com.ureca.uhyu.domain.brand.repository.CategoryRepository categoryRepository;
+
     private final WebClient webClient = WebClient.builder()
             .baseUrl("https://api.openai.com/v1")
             .build();
@@ -48,22 +51,65 @@ public class AiService {
 
         try {
             if (systemPrompt == null) {
-                systemPrompt = loadPrompt("prompts/query_to_filters.txt");
+                systemPrompt = loadPrompt("prompts/search_intent_extraction.txt");
             }
 
-            Map<String, Object> requestBody = buildOpenAiRequest(req.userText(), systemPrompt);
+            // 1. Intent Extraction (AI)
+            com.ureca.uhyu.domain.ai.dto.AiIntentExtractionRes intent = extractIntent(req.userText());
 
-            Map<String, Object> response = webClient.post()
-                    .uri("/chat/completions")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .timeout(Duration.ofSeconds(3))
-                    .block();
+            // 2. DB Grounding & Validation
+            List<Long> brandIds = new java.util.ArrayList<>();
+            List<Long> categoryIds = new java.util.ArrayList<>();
+            List<String> unrecognizedFilters = new java.util.ArrayList<>();
 
-            return parseResponse(response);
+            // Brands Process
+            for (String brandKey : intent.brandKeywords()) {
+               List<com.ureca.uhyu.domain.brand.entity.Brand> brands = brandRepository.findByBrandNameContaining(brandKey);
+               if (brands.isEmpty()) {
+                   unrecognizedFilters.add(brandKey);
+               } else if (brands.size() == 1) {
+                   brandIds.add(brands.get(0).getId());
+               } else {
+                   // Ambiguity Resolution: Exact match first, then shortest length
+                   com.ureca.uhyu.domain.brand.entity.Brand bestMatch = brands.stream()
+                           .filter(b -> b.getBrandName().equals(brandKey))
+                           .findFirst()
+                           .orElse(brands.stream()
+                                   .min(java.util.Comparator.comparingInt(b -> b.getBrandName().length()))
+                                   .orElse(brands.get(0)));
+                   brandIds.add(bestMatch.getId());
+               }
+            }
+
+            // Categories Process
+            for (String catKey : intent.categoryKeywords()) {
+                List<com.ureca.uhyu.domain.brand.entity.Category> categories = categoryRepository.findByCategoryNameContaining(catKey);
+                if (categories.isEmpty()) {
+                    unrecognizedFilters.add(catKey);
+                } else if (categories.size() == 1) {
+                    categoryIds.add(categories.get(0).getId());
+                } else {
+                    com.ureca.uhyu.domain.brand.entity.Category bestMatch = categories.stream()
+                            .filter(c -> c.getCategoryName().equals(catKey))
+                            .findFirst()
+                            .orElse(categories.stream()
+                                    .min(java.util.Comparator.comparingInt(c -> c.getCategoryName().length()))
+                                    .orElse(categories.get(0)));
+                    categoryIds.add(bestMatch.getId());
+                }
+            }
+
+            // 3. Construct Final Response
+            // Radius processing from criteria (optional enhancement, sticking to default for now unless parsed)
+            // For V1, criteria are just passed as notes or potential future use. currently just logging/ignoring specific numeric parsing provided by AI in old logic.
+            // But wait, old logic extracted radius. New prompt asks for 'criteria' strings.
+            // Let's keep simple: use defaultRadius. If 'criteria' has 'near', maybe set small radius?
+            // For safety and strict adherence to plan: just using extracted IDs.
+
+            String notes = "Extracted Keywords: " + intent.brandKeywords() + ", " + intent.categoryKeywords() +
+                    " / Unrecognized: " + unrecognizedFilters;
+
+            return new AiQueryRes(defaultRadius, categoryIds, brandIds, unrecognizedFilters, notes, 1.0, false);
 
         } catch (Exception e) {
             log.error("AI Search Error: {}", e.getMessage(), e);
@@ -72,26 +118,39 @@ public class AiService {
         }
     }
 
+    private com.ureca.uhyu.domain.ai.dto.AiIntentExtractionRes extractIntent(String userText) {
+        Map<String, Object> requestBody = buildOpenAiRequest(userText, systemPrompt);
+
+        Map<String, Object> response = webClient.post()
+                .uri("/chat/completions")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .timeout(Duration.ofSeconds(5)) // Increased timeout slightly
+                .block();
+
+        return parseResponse(response);
+    }
+
     private String loadPrompt(String path) throws IOException {
         ClassPathResource resource = new ClassPathResource(path);
         return StreamUtils.copyToString(resource.getInputStream(), StandardCharsets.UTF_8);
     }
 
     private Map<String, Object> buildOpenAiRequest(String userText, String systemPrompt) {
-        // Structured Outputs Schema
         Map<String, Object> jsonSchema = Map.of(
-                "name", "search_filters",
+                "name", "search_intent",
                 "strict", true,
                 "schema", Map.of(
                         "type", "object",
                         "properties", Map.of(
-                                "radius", Map.of("type", "integer", "description", "Search radius in meters"),
-                                "category", Map.of("type", List.of("string", "null"), "description", "Category name"),
-                                "brand", Map.of("type", List.of("string", "null"), "description", "Brand name"),
-                                "notes", Map.of("type", "string", "description", "Reasoning"),
-                                "confidence", Map.of("type", "number", "description", "Confidence score")
+                                "brandKeywords", Map.of("type", "array", "items", Map.of("type", "string"), "description", "List of potential brand names"),
+                                "categoryKeywords", Map.of("type", "array", "items", Map.of("type", "string"), "description", "List of potential category names"),
+                                "criteria", Map.of("type", "array", "items", Map.of("type", "string"), "description", "Other search criteria")
                         ),
-                        "required", List.of("radius", "category", "brand", "notes", "confidence"),
+                        "required", List.of("brandKeywords", "categoryKeywords", "criteria"),
                         "additionalProperties", false
                 )
         );
@@ -111,7 +170,7 @@ public class AiService {
     }
 
     @SuppressWarnings("unchecked")
-    private AiQueryRes parseResponse(Map<String, Object> response) {
+    private com.ureca.uhyu.domain.ai.dto.AiIntentExtractionRes parseResponse(Map<String, Object> response) {
         try {
             if (response == null || !response.containsKey("choices")) {
                 throw new RuntimeException("Invalid response from OpenAI");
@@ -126,16 +185,24 @@ public class AiService {
             Map<String, Object> message = (Map<String, Object>) choice.get("message");
             String content = (String) message.get("content");
 
-            // content is a JSON string enforced by the schema
             JsonNode root = objectMapper.readTree(content);
 
-            int radius = root.get("radius").asInt();
-            String category = root.get("category").isNull() ? null : root.get("category").asText();
-            String brand = root.get("brand").isNull() ? null : root.get("brand").asText();
-            String notes = root.get("notes").asText();
-            double confidence = root.get("confidence").asDouble();
+            List<String> brands = new java.util.ArrayList<>();
+            if (root.has("brandKeywords")) {
+                root.get("brandKeywords").forEach(n -> brands.add(n.asText()));
+            }
 
-            return new AiQueryRes(radius, category, brand, notes, confidence, false);
+            List<String> categories = new java.util.ArrayList<>();
+            if (root.has("categoryKeywords")) {
+                root.get("categoryKeywords").forEach(n -> categories.add(n.asText()));
+            }
+
+            List<String> criteria = new java.util.ArrayList<>();
+            if (root.has("criteria")) {
+                root.get("criteria").forEach(n -> criteria.add(n.asText()));
+            }
+
+            return new com.ureca.uhyu.domain.ai.dto.AiIntentExtractionRes(brands, categories, criteria);
 
         } catch (Exception e) {
             log.error("Failed to parse OpenAI response", e);
