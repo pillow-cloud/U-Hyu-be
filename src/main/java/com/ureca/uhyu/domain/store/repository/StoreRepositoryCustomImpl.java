@@ -46,7 +46,7 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
     }
 
     @Override
-    public List<MapRes> findStoresByFilters(Double lat, Double lon, Double radius, String categoryName, String brandName) {
+    public List<MapRes> findStoresByFilters(Double lat, Double lon, Double radius, String categoryName, String brandName, List<Long> brandIds, List<Long> categoryIds) {
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(withinRadius(lat, lon, radius));
 
@@ -56,6 +56,14 @@ public class StoreRepositoryCustomImpl implements StoreRepositoryCustom {
 
         if (brandName != null && !brandName.isBlank()) {
             builder.and(brand.brandName.containsIgnoreCase(brandName));
+        }
+
+        if (brandIds != null && !brandIds.isEmpty()) {
+            builder.and(brand.id.in(brandIds));
+        }
+
+        if (categoryIds != null && !categoryIds.isEmpty()) {
+            builder.and(category.id.in(categoryIds));
         }
 
         // ✅ grade.GOOD에 해당하는 혜택 하나만 가져오기 위한 서브쿼리

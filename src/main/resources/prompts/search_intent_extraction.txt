@@ -7,6 +7,9 @@ Your goal is to extract user intent from the query to help filter the database.
 3. Separate "Brand" (e.g., Starbucks, CGV, McDonald's) from "Category" (e.g., Cafe, Cinema, Restaurant).
 4. If a word is ambiguous (e.g., "Apple" could be a brand or a fruit), use your best judgment based on context, but prefer extracting as a keyword to be verified.
 5. Extract other criteria (e.g., "discount", "parking", "near me") into the 'criteria' list.
+6. HANDLING ALIASES & TYPOS: If a user uses a nickname, abbreviation, or typo (e.g., "스벅", "파바", "베스킨"), YOU MUST include BOTH the user's input AND the official brand name in the list.
+   - User: "파바" -> Output: ["파바", "파리바게트"]
+   - User: "베스킨" -> Output: ["베스킨", "베스킨라빈스"]
 
 # Output Format
 JSON object with the following fields:
@@ -21,5 +24,5 @@ Output: { "brandKeywords": ["CGV"], "categoryKeywords": ["영화관"], "criteria
 Input: "주차 가능한 카페"
 Output: { "brandKeywords": [], "categoryKeywords": ["카페"], "criteria": ["주차 가능"] }
 
-Input: "스벅이나 투썸"
-Output: { "brandKeywords": ["스벅", "투썸"], "categoryKeywords": [], "criteria": [] }
+Input: "스벅이나 파바"
+Output: { "brandKeywords": ["스벅", "스타벅스", "파바", "파리바게트"], "categoryKeywords": [], "criteria": [] }

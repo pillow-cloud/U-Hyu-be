@@ -9,7 +9,7 @@ import com.ureca.uhyu.domain.user.entity.User;
 import java.util.List;
 
 public interface MapService {
-    List<MapRes> getFilteredStores(Double lat, Double lon, Double radius, String category, String brand);
+    List<MapRes> getFilteredStores(Double lat, Double lon, Double radius, String category, String brand, List<Long> brandIds, List<Long> categoryIds);
     List<MapRes> getBookmarkedStores(User user);
     StoreDetailRes getStoreDetail(Long storeId, User user);
     MapBookmarkRes toggleBookmark(User user, Long storeId);

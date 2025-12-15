@@ -7,7 +7,7 @@ import com.ureca.uhyu.domain.brand.enums.BenefitType;
 import com.ureca.uhyu.domain.brand.enums.StoreType;
 import com.ureca.uhyu.domain.map.dto.response.MapBookmarkRes;
 import com.ureca.uhyu.domain.map.dto.response.MapRes;
-import com.ureca.uhyu.domain.map.event.BookmarkEventListener;
+
 import com.ureca.uhyu.domain.map.event.BookmarkToggledEvent;
 import com.ureca.uhyu.domain.recommendation.entity.Recommendation;
 import com.ureca.uhyu.domain.recommendation.repository.RecommendationRepository;
@@ -265,10 +265,10 @@ class MapServiceImplTest {
             String categoryName = "카페";
             String brandName = "이디야";
 
-            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, brandName))
+            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, brandName, null, null))
                     .thenReturn(List.of(mapRes));
 
-            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, categoryName, brandName);
+            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, categoryName, brandName, null, null);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).storeName()).isEqualTo("이디야 판교점");
@@ -281,10 +281,10 @@ class MapServiceImplTest {
             double radius = 1000.0;
             String categoryName = "카페";
 
-            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, null))
+            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, null, null, null))
                     .thenReturn(List.of(mapRes));
 
-            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, categoryName, null);
+            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, categoryName, null, null, null);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).storeName()).isEqualTo("이디야 판교점");
@@ -297,10 +297,10 @@ class MapServiceImplTest {
             double radius = 1000.0;
             String brandName = "이디야";
 
-            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, null, brandName))
+            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, null, brandName, null, null))
                     .thenReturn(List.of(mapRes));
 
-            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, null, brandName);
+            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, null, brandName, null, null);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).storeName()).isEqualTo("이디야 판교점");
@@ -312,10 +312,10 @@ class MapServiceImplTest {
             double lon = 127.0;
             double radius = 1000.0;
 
-            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, null, null))
+            when(storeRepositoryCustom.findStoresByFilters(lat, lon, radius, null, null, null, null))
                     .thenReturn(List.of(mapRes));
 
-            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, null, null);
+            List<MapRes> result = mapService.getFilteredStores(lat, lon, radius, null, null, null, null);
 
             assertThat(result).hasSize(1);
             assertThat(result.get(0).storeName()).isEqualTo("이디야 판교점");
@@ -366,17 +366,19 @@ class MapServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionIfNoBenefitExists() {
+        void shouldReturnDefaultMessageIfNoBenefitExists() {
             // given
             User user = mock(User.class);
             when(user.getGrade()).thenReturn(Grade.VIP);
 
             brand.setBenefits(new ArrayList<>()); // 빈 리스트 설정
             when(storeRepository.findById(1L)).thenReturn(Optional.of(store));
-            when(user.getGrade()).thenReturn(Grade.VIP);
 
-            // when & then
-            assertThrows(GlobalException.class, () -> mapService.getStoreDetail(1L, user));
+            // when
+            StoreDetailRes res = mapService.getStoreDetail(1L, user);
+
+            // then
+            assertThat(res.benefits().benefitText()).isEqualTo("혜택 정보 없음");
         }
 
         @Test

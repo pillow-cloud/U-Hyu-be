@@ -8,7 +8,7 @@ import com.ureca.uhyu.domain.user.entity.User;
 import com.ureca.uhyu.global.annotation.CurrentUser;
 import com.ureca.uhyu.global.response.CommonResponse;
 import com.ureca.uhyu.global.response.ResultCode;
-import io.swagger.v3.oas.annotations.Operation;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +29,11 @@ public class MapController implements MapControllerDocs{
             @RequestParam Double lon,
             @RequestParam Double radius,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String brand
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) List<Long> brandIds,
+            @RequestParam(required = false) List<Long> categoryIds
     ) {
-        return CommonResponse.success(ResultCode.SUCCESS, mapService.getFilteredStores(lat, lon, radius, category, brand));
+        return CommonResponse.success(ResultCode.SUCCESS, mapService.getFilteredStores(lat, lon, radius, category, brand, brandIds, categoryIds));
     }
 
     @GetMapping("/stores/bookmark")
