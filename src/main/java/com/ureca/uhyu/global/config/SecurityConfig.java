@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -98,10 +99,17 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .exceptionHandling(exceptionHandling ->
-                        exceptionHandling.accessDeniedHandler((request, response, accessDeniedException) -> {
-                            log.warn("Access Denied: {}", accessDeniedException.getMessage());
-                            response.sendRedirect("/user/extra-info"); // AccessDenied 발생 시 리다이렉트
-                        })
+                        exceptionHandling
+                                .authenticationEntryPoint((request, response, authException) -> {
+                                    log.warn("Authentication Failed: {}", authException.getMessage());
+                                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                    response.setContentType("application/json;charset=UTF-8");
+                                    response.getWriter().write("{\"code\": \"UNAUTHORIZED\", \"message\": \"로그인이 필요합니다.\"}");
+                                })
+                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                    log.warn("Access Denied: {}", accessDeniedException.getMessage());
+                                    response.sendRedirect("/user/extra-info"); // AccessDenied 발생 시 리다이렉트
+                                })
                 )
                 .addFilterAfter(tmpUserRedirectFilter, UsernamePasswordAuthenticationFilter.class);
 

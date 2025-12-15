@@ -45,8 +45,8 @@ public class MapServiceImpl implements MapService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public List<MapRes> getFilteredStores(Double lat, Double lon, Double radius, String categoryName, String brandName) {
-        return storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, brandName);
+    public List<MapRes> getFilteredStores(Double lat, Double lon, Double radius, String categoryName, String brandName, List<Long> brandIds, List<Long> categoryIds) {
+        return storeRepositoryCustom.findStoresByFilters(lat, lon, radius, categoryName, brandName, brandIds, categoryIds);
     }
 
     @Override

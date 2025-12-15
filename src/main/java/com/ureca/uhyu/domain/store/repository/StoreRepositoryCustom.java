@@ -5,7 +5,7 @@ import com.ureca.uhyu.domain.store.entity.Store;
 import java.util.List;
 
 public interface StoreRepositoryCustom {
-    List<MapRes> findStoresByFilters(Double lon, Double lat, Double radius, String categoryName, String brandName);
+    List<MapRes> findStoresByFilters(Double lon, Double lat, Double radius, String categoryName, String brandName, List<Long> brandIds, List<Long> categoryIds);
 
     List<Store> findNearestStores(Double lat, Double lon, List<Long> brandIds);
 }

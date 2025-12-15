@@ -101,7 +101,15 @@ public interface MapControllerDocs {
             @Parameter(
                     description = "브랜드명 필터 (부분 문자열 검색)",
                     example = "스타벅스"
-            ) @RequestParam(required = false) String brand
+            ) @RequestParam(required = false) String brand,
+            @Parameter(
+                    description = "브랜드 ID 목록 필터",
+                    example = "[1, 2]"
+            ) @RequestParam(required = false) List<Long> brandIds,
+            @Parameter(
+                    description = "카테고리 ID 목록 필터",
+                    example = "[1, 2]"
+            ) @RequestParam(required = false) List<Long> categoryIds
     );
 
     @Operation(
