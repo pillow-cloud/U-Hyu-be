@@ -20,7 +20,7 @@ app:
   frontend:
     url:
       local: http://localhost:5173
-      prod: https://u-hyu.site
+      prod: https://uhyu.pillow12360.world
 
 management:
   endpoints:

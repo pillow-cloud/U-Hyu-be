@@ -123,9 +123,6 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
                 "http://localhost:5173",
-                "https://www.u-hyu.site",
-                "https://api.u-hyu.site",
-                "https://u-hyu.site",
                 "https://uhyu.pillow12360.world"
         ));
 
